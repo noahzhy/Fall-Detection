@@ -21,15 +21,16 @@ while(cap.isOpened()):
         if(frameNum >= 2):
             currentframe = cv2.cvtColor(tempframe, cv2.COLOR_BGR2GRAY)
             currentframe = cv2.absdiff(currentframe, previousframe)
-            # currentframe = cv2.erode(currentframe, None, iterations=1)
             currentframe = cv2.dilate(currentframe, None, iterations=3)
+            currentframe = cv2.erode(currentframe, None, iterations=3)
+
+            # currentframe = cv2.morphologyEx(currentframe, cv2.MORPH_GRADIENT, kernel)
 
             ret, threshold_frame = cv2.threshold(
-                currentframe, 24, 255, cv2.THRESH_BINARY)
-            gauss_image = cv2.GaussianBlur(threshold_frame, (9, 9), 0)
+                currentframe, 20, 255, cv2.THRESH_BINARY)
+            gauss_image = cv2.GaussianBlur(threshold_frame, (7, 7), 0)
 
             # Display the resulting frame
-            cv2.imshow('absdiff', currentframe)
             cv2.imshow('gauss', gauss_image)
 
             # Press Q on keyboard to  exit
