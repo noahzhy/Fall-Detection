@@ -123,8 +123,6 @@ data = {
     # 'C': factor
 }
 
-
-
 df = pd.DataFrame(data)
 
 df.to_csv("test.csv", mode='w',index=False, header=['A','B','C'])
