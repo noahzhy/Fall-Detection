@@ -1,4 +1,7 @@
+import os
 import cv2
+import csv
+import pandas as pd
 # import kalman
 # import numpy as np
 # import minpy.numpy as np
@@ -9,15 +12,16 @@ ax = []                    # 定义一个 x 轴的空列表用来接收动态的
 ay = []                    # 定义一个 y 轴的空列表用来接收动态的数据
 rate_w_h = []
 rate_speed = []
-area_w_h = []
+area_motion = []
+factor = []
 plt.ion()                  # 开启一个画图的窗口
 
 # plt.clf()
 # count = 0
+cap = cv2.VideoCapture('video_06.avi')
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
-
-
-cap = cv2.VideoCapture('video_02.avi')
 # cap.set(cv2.CAP_PROP_FPS, 30)
 # Check if camera opened successfully
 if (cap.isOpened() == False):
@@ -27,15 +31,14 @@ frameNum = 0
 x,y,w,h = 0, 0, 0, 0
 tempSpeed = [0.0, 0.0]
 currentSpeed = [0.0, 0.0]
-a = 0
-tempa = 0
-area = 0
+a, tempa, area = 0, 0, 0
 
 # Read until video is completed
-while (cap.isOpened()):
+while cap.isOpened():
     # Capture frame-by-frame
     ret, frame = cap.read()
-    frame = cv2.resize(frame, (320,240))
+    # if (cap.get())
+    # frame = cv2.resize(frame, (320,240))
     frameNum += 1
     if ret == True:
         tempframe = frame.copy()
@@ -68,7 +71,7 @@ while (cap.isOpened()):
                 continue
 
             if (frameNum % 2 == 0):
-                currentSpeed = [float(x+w/2), float(y+h/2)]
+                currentSpeed = [x+w/2, y+h/2]
                 a = ((currentSpeed[0]-tempSpeed[0])**2 + (currentSpeed[1]-tempSpeed[1])**2)**0.5
                 # print(a)
                 if (a > 30):
@@ -76,26 +79,27 @@ while (cap.isOpened()):
                 tempSpeed = currentSpeed
                 tempa = a
 
-            rate_speed.append(a* 3)
 
             plt.clf()
             plt.title('Fall Analysis')
             ax.append(frameNum)
-            ay.append(y+h/2)                  # y of mid-point
-            rate_w_h.append(float(w/h)*100)     # rate of w/h
-            area_w_h.append(area/100)
+            ay.append(y)                    # y of mid-point
+            area_motion.append(area/100)
+            rate_w_h.append((w/h)*100)     # rate of w/h
+            # rate_speed.append(a* 3)
+            # factor.append(a*area/100)
 
             plt.plot(ax, ay, color='blue', label='y of mid-point')
-            plt.plot(ax, rate_w_h, color='green', label='rate of w/h')
-            plt.plot(ax, rate_speed, color='red', label='rate of speed')
-            plt.plot(ax, area_w_h, color='orange', label='area of motion')
+            plt.plot(ax, area_motion, color='orange', label='area of motion')
+            plt.plot(ax, rate_w_h, color='green', label='w/h')
+            # plt.plot(ax, rate_speed, color='red', label='acc')
+            # plt.plot(ax,factor, color='skyblue', label='factor')
+
             plt.legend()                        # 显示图例
             plt.xlabel('Frames')
 
-
             # plt.draw()                        # for ubuntu
             plt.pause(0.01)                     # for windows
-
 
             # rectangle画出矩形，frame是原图，(x,y)是矩阵的左上点坐标，(x+w,y+h)是矩阵右下点坐标
             cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
@@ -112,6 +116,20 @@ while (cap.isOpened()):
     else:
         break
 
+data = {
+    'A': ay,
+    'B': area_motion,
+    'C': rate_w_h
+    # 'C': factor
+}
+
+
+
+df = pd.DataFrame(data)
+
+df.to_csv("test.csv", mode='w',index=False, header=['A','B','C'])
+print(df)
+# kalman.show_data(df)
 
 plt.pause(5)
 plt.ioff()
