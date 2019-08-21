@@ -140,6 +140,6 @@ print(f'final results: accuracy: {acc_final} loss: {loss_final}')
 
 pickle.dump(predictions, open("predictions.p", "wb"))
 pickle.dump(history, open("history.p", "wb"))
-tf.train.write_graph(sess.graph_def, '.', '/media/old-tf-hackers-6/checkpoint/har.pbtxt')
-saver.save(sess, save_path = "/media/old-tf-hackers-6/checkpoint/har.ckpt")
+tf.train.write_graph(sess.graph_def, '.', 'media/old-tf-hackers-6/checkpoint/har.pbtxt')
+saver.save(sess, save_path = "media/old-tf-hackers-6/checkpoint/har.ckpt")
 sess.close()
