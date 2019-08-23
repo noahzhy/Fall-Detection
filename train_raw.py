@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import pickle
@@ -10,13 +11,14 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 
 # %matplotlib inline
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 sns.set(style='whitegrid', palette='muted', font_scale=1.5)
 rcParams['figure.figsize'] = 14, 8
 RANDOM_SEED = 42
 
-columns = ['user','activity','timestamp', 'x-axis', 'y-axis', 'z-axis']
-df = pd.read_csv('data/WISDM_ar_v1.1_raw.txt', header = None, names = columns)
+columns = ['activity','timestamp', 'x-axis', 'y-axis', 'z-axis', 'user']
+df = pd.read_csv('data/demo.csv', header = None, names = columns)
 df = df.dropna()
 
 df.head()
@@ -27,11 +29,11 @@ def plot_activity(activity, df):
     for ax in axis:
         ax.legend(loc='lower left', bbox_to_anchor=(1.0, 0.5))
 
-plot_activity("Sitting", df)
+plot_activity("fall", df)
 
-N_TIME_STEPS = 200
+N_TIME_STEPS = 50
 N_FEATURES = 3
-step = 20
+step = 5
 segments = []
 labels = []
 for i in range(0, len(df) - N_TIME_STEPS, step):
@@ -50,7 +52,7 @@ X_train, X_test, y_train, y_test = train_test_split(reshaped_segments,
                                                     test_size=0.2,
                                                     random_state=RANDOM_SEED)
 
-N_CLASSES = 6
+N_CLASSES = 3
 N_HIDDEN_UNITS = 64
 
 def create_LSTM_model(inputs):
@@ -90,7 +92,8 @@ pred_softmax = tf.nn.softmax(pred_Y, name="y_")
 
 L2_LOSS = 0.0015
 
-l2 = L2_LOSS * sum(tf.nn.l2_loss(tf_var) for tf_var in tf.trainable_variables())
+l2 = L2_LOSS * \
+    sum(tf.nn.l2_loss(tf_var) for tf_var in tf.trainable_variables())
 
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits = pred_Y, labels = Y)) + l2
 
@@ -100,8 +103,8 @@ correct_pred = tf.equal(tf.argmax(pred_softmax, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, dtype=tf.float32))
 
 
-N_EPOCHS = 50
-BATCH_SIZE = 1024
+N_EPOCHS = 100
+BATCH_SIZE = 32
 saver = tf.train.Saver()
 
 history = dict(train_loss=[],
@@ -140,6 +143,6 @@ print(f'final results: accuracy: {acc_final} loss: {loss_final}')
 
 pickle.dump(predictions, open("predictions.p", "wb"))
 pickle.dump(history, open("history.p", "wb"))
-tf.train.write_graph(sess.graph_def, '.', 'media/old-tf-hackers-6/checkpoint/har.pbtxt')
-saver.save(sess, save_path = "media/old-tf-hackers-6/checkpoint/har.ckpt")
+tf.io.write_graph(sess.graph_def, '.', 'media/checkpoint/3_100_bs32.pbtxt')
+saver.save(sess, save_path = "media/checkpoint/3_100_bs32.ckpt")
 sess.close()
