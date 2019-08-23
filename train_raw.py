@@ -11,7 +11,7 @@ from sklearn import metrics
 from sklearn.model_selection import train_test_split
 
 # %matplotlib inline
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 sns.set(style='whitegrid', palette='muted', font_scale=1.5)
 rcParams['figure.figsize'] = 14, 8
@@ -21,15 +21,15 @@ columns = ['activity','timestamp', 'x-axis', 'y-axis', 'z-axis', 'user']
 df = pd.read_csv('data/demo.csv', header = None, names = columns)
 df = df.dropna()
 
-df.head()
-def plot_activity(activity, df):
-    data = df[df['activity'] == activity][['x-axis', 'y-axis', 'z-axis']][:200]
-    axis = data.plot(subplots=True, figsize=(16, 12),
-                     title=activity)
-    for ax in axis:
-        ax.legend(loc='lower left', bbox_to_anchor=(1.0, 0.5))
-
-plot_activity("fall", df)
+# df.head()
+# def plot_activity(activity, df):
+#     data = df[df['activity'] == activity][['x-axis', 'y-axis', 'z-axis']][:200]
+#     axis = data.plot(subplots=True, figsize=(16, 12),
+#                      title=activity)
+#     for ax in axis:
+#         ax.legend(loc='lower left', bbox_to_anchor=(1.0, 0.5))
+#
+# plot_activity("fall", df)
 
 N_TIME_STEPS = 50
 N_FEATURES = 3
@@ -43,8 +43,8 @@ for i in range(0, len(df) - N_TIME_STEPS, step):
     label = stats.mode(df['activity'][i: i + N_TIME_STEPS])[0][0]
     segments.append([xs, ys, zs])
     labels.append(label)
-
-# np.array(segments).shape
+# print(labels)
+np.array(segments).shape
 reshaped_segments = np.asarray(segments, dtype= np.float32).reshape(-1, N_TIME_STEPS, N_FEATURES)
 labels = np.asarray(pd.get_dummies(labels), dtype = np.float32)
 X_train, X_test, y_train, y_test = train_test_split(reshaped_segments,
@@ -103,7 +103,7 @@ correct_pred = tf.equal(tf.argmax(pred_softmax, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, dtype=tf.float32))
 
 
-N_EPOCHS = 100
+N_EPOCHS = 120
 BATCH_SIZE = 32
 saver = tf.train.Saver()
 
@@ -143,6 +143,6 @@ print(f'final results: accuracy: {acc_final} loss: {loss_final}')
 
 pickle.dump(predictions, open("predictions.p", "wb"))
 pickle.dump(history, open("history.p", "wb"))
-tf.io.write_graph(sess.graph_def, '.', 'media/checkpoint/3_100_bs32.pbtxt')
-saver.save(sess, save_path = "media/checkpoint/3_100_bs32.ckpt")
+tf.io.write_graph(sess.graph_def, '.', 'media/checkpoint/class{}_epoch{}_bs{}.pbtxt'.format(N_CLASSES, N_EPOCHS, BATCH_SIZE))
+saver.save(sess, save_path = "media/checkpoint/class{}_epoch{}_bs{}.ckpt".format(N_CLASSES, N_EPOCHS, BATCH_SIZE))
 sess.close()
