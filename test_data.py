@@ -33,8 +33,10 @@ ys = df['y-axis'].values[0:50]
 zs = df['z-axis'].values[0:50]
 in_data = []
 in_data.append([xs, ys, zs])
-
-feed_dict = {node_in:in_data}
+reshaped_segments = np.asarray(in_data, dtype= np.float32).reshape(-1, 50, 3)
+feed_dict = {node_in:reshaped_segments}
 
 # feed_dict = {node_in:in_data}
 pred = sess.run(model_out, feed_dict)
+
+print(pred)
