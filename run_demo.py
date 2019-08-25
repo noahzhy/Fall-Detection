@@ -1,52 +1,82 @@
-import os
-import cv2
-import csv
-import time
+from collections import deque
+import prediction as pre
+import tensorflow as tf
+import _thread as thr
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+import time
+import cv2
+import csv
+import os
 # import minpy.numpy as np
 # import matplotlib.pyplot as plt
 
-
-# draw the picture
-ax = []                    # 定义一个 x 轴的空列表用来接收动态的数据
-ay = []                    # 定义一个 y 轴的空列表用来接收动态的数据
-rate_w_h = []
-rate_speed = []
-area_motion = []
+data = deque(maxlen=50)
+x_axis = []
+y_axis = []
+z_axis = []
 timestamps = []
-# plt.ion()                  # 开启一个画图的窗口
+frameNum = 0
+x,y,w,h = 0, 0, 0, 0
+# tempSpeed = [0.0, 0.0]
+# currentSpeed = [0.0, 0.0]
+# a, tempa, area = 0, 0, 0
+a, area = 0, 0
+tempY = 0
+
+FLAG_FALL = False
 
 def timestamp(convert_to_utc=False):
     t = time.time()
     return int(round(t * 1000))
 
-# plt.clf()
-# count = 0
 cap = cv2.VideoCapture(0)
-# cap.set(3, 320) #设置分辨率
-# cap.set(4, 240)
 # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-
-# cap.set(cv2.CAP_PROP_FPS, 30)
+# cap.set(cv2.CAP_PROP_FPS, 25)
 # Check if camera opened successfully
 if (cap.isOpened() == False):
-    print("Error opening video stream or file")
+    print("Error: opening video stream or file")
 
-frameNum = 0
-x,y,w,h = 0, 0, 0, 0
-tempSpeed = [0.0, 0.0]
-currentSpeed = [0.0, 0.0]
-a, tempa, area = 0, 0, 0
-tempY = 0
-# Read until video is completed
+
+def fall_or_not(data, frameNum):
+    global FLAG_FALL
+
+    if (len(data)<50):
+        pass
+    elif frameNum%20 == 0:
+        res = pre.prediction(data)
+        if (res[0] == 0 and res[1] > 0.88):
+            FLAG_FALL = True
+            print('fall: {}'.format(res[1]))
+        elif (res[0] == 1):
+            print('lying: {}'.format(res[1]))
+        elif (res[0] == 2 and res[1] > 0.75):
+            FLAG_FALL = False
+            print('normal: {}'.format(res[1]))
+        else:
+            pass
+
+
+def update_rect(frame,x,y,w,h,flag):
+    color = (0,255,0)
+    if flag:
+        color = (0,0,255)
+    else:
+        color = (0,255,0)
+    cv2.rectangle(frame, (x,y), (x+w,y+h), color, 2)
+
+
+#
+# try:
+#    thr.start_new_thread(update_rect, (x,y,w,h,1, ))
+# except:
+#    print ("Error: cannot start the thread")
+
 while cap.isOpened():
     # Capture frame-by-frame
     ret, frame = cap.read()
-    # if (cap.get())
-    # frame = cv2.resize(frame, (320,240))
+    frame = cv2.resize(frame, (320,240))
     frameNum += 1
     if ret == True:
         tempframe = frame.copy()
@@ -72,71 +102,47 @@ while cap.isOpened():
             if (w*h==0):
                 continue
 
-            if (frameNum % 2 == 0):
-                currentSpeed = [x+w/2, y+h/2]
-                a = ((currentSpeed[0]-tempSpeed[0])**2 + (currentSpeed[1]-tempSpeed[1])**2)**0.5
-                # print(a)
-                if (a > 30):
-                    a = tempa
-                tempSpeed = currentSpeed
-                tempa = a
+            # if (frameNum % 2 == 0):
+            #     currentSpeed = [x+w/2, y+h/2]
+            #     a = ((currentSpeed[0]-tempSpeed[0])**2 + (currentSpeed[1]-tempSpeed[1])**2)**0.5
+            #     # print(a)
+            #     if (a > 30):
+            #         a = tempa
+            #     tempSpeed = currentSpeed
+            #     tempa = a
 
             # ax.append(frameNum)
-            ay.append(y)                    # y of mid-point
+
             ys = abs(y-tempY)
-            if (ys<15):
+            if (ys<16):
                 ys = ys
             else:
                 ys = 0.1
             tempY = y
-            area_motion.append(area/1000*ys)
-            rate_w_h.append((w/h)*100)     # rate of w/h
 
-            timestamps.append(str(timestamp())+"{0:04d}".format(frameNum))
+            data.append([y, (w/h)*100, area/1000*ys])
 
-            # plt.plot(ax, ay, color='blue', label='X: y of mid-point')
-            # plt.plot(ax, rate_w_h, color='green', label='Y: w/h')
-            # plt.plot(ax, area_motion, color='orange', label='Z: area of motion')
+            try:
+                if len(data)>=50:
+                    thr.start_new_thread(fall_or_not, (data, frameNum, ))
+            except:
+               print ("Error: cannot start the thread")
 
-            # plt.legend()                        # 显示图例
-            # plt.xlabel('Frames')
-            #
-            # # plt.draw()                        # for ubuntu
-            # plt.pause(0.01)                     # for windows
-
-            # rectangle画出矩形，frame是原图，(x,y)是矩阵的左上点坐标，(x+w,y+h)是矩阵右下点坐标
-            cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-            # Display the resulting frame
+            # timestamps.append(str(timestamp())+"{0:04d}".format(frameNum))
+            # cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
+            update_rect(frame,x,y,w,h,FLAG_FALL)
             cv2.imshow('frame', frame)
             # cv2.imshow('threshold', currentframe)
             # cv2.imshow('gauss', gauss_image)
 
-            # Press Q on keyboard to  exit
             if cv2.waitKey(33) & 0xFF == ord('q'):
                 break
+
         previousframe = cv2.cvtColor(tempframe, cv2.COLOR_BGR2GRAY)
-    # Break the loop
+
     else:
         break
 
-# data = {
-#     # 'action': 'n/a',
-#     # 'timestamp': timestamps,
-#     'X': ay,
-#     'Y': rate_w_h,
-#     'Z': area_motion  # speed of motion area
-# }
-#
-# df = pd.DataFrame(data)
 
-# fileName = path.split('.')[0].split('/')[-1]
-# df.to_csv("dataset/{}.csv".format(fileName), mode='w',index=False, header=['action', 'timestamp', 'x-axis', 'y-axis', 'z-axis'])
-# print(df)
-# kalman.show_data(df)
-
-# plt.pause(5)
-# plt.ioff()
-# When everything done, release the video capture object
 cap.release()
-# Closes all the frames
 cv2.destroyAllWindows()
