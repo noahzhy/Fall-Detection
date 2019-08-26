@@ -32,7 +32,7 @@ def timestamp(convert_to_utc=False):
 cap = cv2.VideoCapture(0)
 # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
-# cap.set(cv2.CAP_PROP_FPS, 25)
+cap.set(cv2.CAP_PROP_FPS, 25)
 
 if (cap.isOpened() == False):
     print("Error: opening video stream or file")
@@ -72,7 +72,7 @@ def warning_status():
     # if FLAG_WARNING:
     if (timestamp() - warning_timestamp >= 2):
         FLAG_FALL = True
-        fall_cancel = 0.75
+        fall_cancel = 0.73
 
 
 def update_rect(frame,x,y,w,h,flag_warning,flag_fall):
@@ -114,7 +114,7 @@ while cap.isOpened():
             cnts, hierarchy = cv2.findContours(threshold_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             for c in cnts:
-                if cv2.contourArea(c) < 1200 or cv2.contourArea(c) > 19200:
+                if cv2.contourArea(c) < 1500 or cv2.contourArea(c) > 19200:
                     continue
 
                 (x,y,w,h) = cv2.boundingRect(c) # update the rectangle
