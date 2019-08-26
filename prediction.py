@@ -41,7 +41,7 @@ def prediction(data):
     # feed_dict = {node_in:in_data}
     pred = sess.run(model_out, feed_dict)
     res = [pred.tolist()[0].index(max(pred.tolist()[0])), max(pred.tolist()[0])]
-    # print(res)
+    # print(pred)
     return res
 
 # x = deque(maxlen=50)
