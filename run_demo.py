@@ -30,7 +30,7 @@ def timestamp(convert_to_utc=False):
     t = time.time()
     return int(t)
 
-cap = cv2.VideoCapture('F:/video_01.avi')
+cap = cv2.VideoCapture(0)
 # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 cap.set(cv2.CAP_PROP_FPS, 25)
