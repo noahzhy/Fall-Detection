@@ -20,7 +20,8 @@ frameNum = 0
 x,y,w,h = 0, 0, 0, 0
 a, area = 0, 0
 tempY = 0
-fall_cancel = 0.7
+fall_cancel = 0.4
+fall_count = 0
 
 FLAG_FALL = False
 FLAG_WARNING = False
@@ -29,7 +30,7 @@ def timestamp(convert_to_utc=False):
     t = time.time()
     return int(t)
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('F:/video_01.avi')
 # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
 # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 cap.set(cv2.CAP_PROP_FPS, 25)
@@ -41,19 +42,21 @@ def fall_or_not(data, frameNum):
     global FLAG_FALL
     global FLAG_WARNING
     global fall_cancel
+    global fall_count
     global warning_timestamp
 
     if (frameNum%20 == 0):
-        if FLAG_WARNING:
-            warning_status()
+        # if FLAG_WARNING:
+        #     warning_status()
 
         res = pre.prediction(data)
-        if (res[0] == 0 and res[1] > 0.86):
-            # FLAG_FALL = True
-
-            if (FLAG_WARNING == False):
-                warning_timestamp = timestamp()
-                FLAG_WARNING = True
+        if (res[0] == 0 and res[1] > 0.65):
+            FLAG_FALL = True
+            fall_count += 1
+            # fall_cancel = 0.4
+            # if (FLAG_WARNING == False):
+            #     warning_timestamp = timestamp()
+            #     FLAG_WARNING = True
             # else:
 
             print('fall: {}'.format(res[1]))
@@ -61,34 +64,29 @@ def fall_or_not(data, frameNum):
             print('lying: {}'.format(res[1]))
         elif (res[0] == 2 and res[1] > fall_cancel):
             FLAG_FALL = False
-            FLAG_WARNING = False
-            fall_cancel = 0.7
+            fall_count = 0
+            # FLAG_WARNING = False
+            # fall_cancel = 0.4
             print('normal: {}'.format(res[1]))
 
 
-def warning_status():
-    global FLAG_FALL
-    global fall_cancel
-    # if FLAG_WARNING:
-    if (timestamp() - warning_timestamp >= 2):
-        FLAG_FALL = True
-        fall_cancel = 0.73
+# def warning_status():
+#     global FLAG_FALL
+#     global fall_cancel
+#     # if FLAG_WARNING:
+#     if (timestamp() - warning_timestamp >= 2):
+#         FLAG_FALL = True
+#         fall_cancel = 0.73
 
 
 def update_rect(frame,x,y,w,h,flag_warning,flag_fall):
     # default is green
     color = (0,255,0)
     text = 'normal'
-    if flag_warning:
-        if flag_fall:
-            color = (0,0,255)
-            text = 'fall'
-        else:
-            color = (0,165,255)
-            text = 'warning'
-    # else:
-    #     color = (0,255,0)
-    #     text = 'normal'
+    # if flag_warning:
+    if flag_fall and fall_count >= 2 :
+        color = (0,0,255)
+        text = 'fall'
 
     cv2.putText(frame, 'Status: {}'.format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
     cv2.rectangle(frame, (x,y), (x+w,y+h), color, 2)

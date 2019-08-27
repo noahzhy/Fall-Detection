@@ -1,2 +1,2 @@
-model_checkpoint_path: "class3_epoch120_bs32.ckpt"
-all_model_checkpoint_paths: "class3_epoch120_bs32.ckpt"
+model_checkpoint_path: "class3_epoch100_bs50.ckpt"
+all_model_checkpoint_paths: "class3_epoch100_bs50.ckpt"

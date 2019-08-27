@@ -12,9 +12,9 @@ INPUT_NODE = "inputs"
 OUTPUT_NODES = {"y_"}
 OUTPUT_NODE = "y_"
 INPUT_SIZE = {1, 50, 3}
-OUTPUT_SIZE = 6
+OUTPUT_SIZE = 3
 
-pb = 'media/frozen_class3_epoch120_bs32.pb'
+pb = 'media/frozen_class3_epoch100_bs50.pb'
 
 def test_data_load():
     df = pd.read_csv('test.csv', usecols=['x-axis', 'y-axis', 'z-axis'])
@@ -41,7 +41,7 @@ def prediction(data):
     # feed_dict = {node_in:in_data}
     pred = sess.run(model_out, feed_dict)
     res = [pred.tolist()[0].index(max(pred.tolist()[0])), max(pred.tolist()[0])]
-    # print(pred)
+    print(pred)
     return res
 
 # x = deque(maxlen=50)

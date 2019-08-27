@@ -1,6 +1,6 @@
 from tensorflow.python.tools import freeze_graph
 
-MODEL_NAME = 'class3_epoch120_bs32'
+MODEL_NAME = 'class3_epoch100_bs50'
 
 input_graph_path = 'checkpoint/' + MODEL_NAME + '.pbtxt'
 checkpoint_path = 'checkpoint/' + MODEL_NAME + '.ckpt'

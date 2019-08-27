@@ -103,8 +103,8 @@ correct_pred = tf.equal(tf.argmax(pred_softmax, 1), tf.argmax(Y, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, dtype=tf.float32))
 
 
-N_EPOCHS = 120
-BATCH_SIZE = 32
+N_EPOCHS = 100
+BATCH_SIZE = 50
 saver = tf.train.Saver()
 
 history = dict(train_loss=[],
