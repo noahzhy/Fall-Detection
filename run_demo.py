@@ -26,13 +26,15 @@ fall_count = 0
 FLAG_FALL = False
 FLAG_WARNING = False
 
+video_path = 'E:/fallv2/video_010.avi'
+
 def timestamp(convert_to_utc=False):
     t = time.time()
     return int(t)
 
-cap = cv2.VideoCapture(0)
-# cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-# cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+cap = cv2.VideoCapture(video_path)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 cap.set(cv2.CAP_PROP_FPS, 25)
 
 if (cap.isOpened() == False):
@@ -45,12 +47,12 @@ def fall_or_not(data, frameNum):
     global fall_count
     global warning_timestamp
 
-    if (frameNum%20 == 0):
+    if (frameNum%10 == 0):
         # if FLAG_WARNING:
         #     warning_status()
 
         res = pre.prediction(data)
-        if (res[0] == 0 and res[1] > 0.65):
+        if (res[0] == 0 and res[1] > 0.59):
             FLAG_FALL = True
             fall_count += 1
             # fall_cancel = 0.4
@@ -121,6 +123,11 @@ while cap.isOpened():
 
             if (w*h==0):
                 continue
+
+
+            if (y-tempY)<0:
+                if (fall_count > 0):
+                    fall_count -= 1
 
             ys = abs(y-tempY)
             if (ys<16):
