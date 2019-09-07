@@ -26,7 +26,10 @@ fall_count = 0
 FLAG_FALL = False
 FLAG_WARNING = False
 
-video_path = 'E:/fallv2/video_010.avi'
+video_path = 'E:/Fall-Detection/cam8.avi'
+
+# fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# out = cv2.VideoWriter('output.avi',fourcc, 25.0, (320,240))
 
 def timestamp(convert_to_utc=False):
     t = time.time()
@@ -81,7 +84,7 @@ def fall_or_not(data, frameNum):
 #         fall_cancel = 0.73
 
 
-def update_rect(frame,x,y,w,h,flag_warning,flag_fall):
+def update_rect(frame,x,y,w,h,flag_fall):
     # default is green
     color = (0,255,0)
     text = 'normal'
@@ -114,7 +117,7 @@ while cap.isOpened():
             cnts, hierarchy = cv2.findContours(threshold_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             for c in cnts:
-                if cv2.contourArea(c) < 1500 or cv2.contourArea(c) > 19200:
+                if cv2.contourArea(c) < 1300 or cv2.contourArea(c) > 19200:
                     continue
 
                 (x,y,w,h) = cv2.boundingRect(c) # update the rectangle
@@ -123,7 +126,6 @@ while cap.isOpened():
 
             if (w*h==0):
                 continue
-
 
             if (y-tempY)<0:
                 if (fall_count > 0):
@@ -146,8 +148,9 @@ while cap.isOpened():
 
             # timestamps.append(str(timestamp())+"{0:04d}".format(frameNum))
             # cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-            update_rect(frame,x,y,w,h,FLAG_WARNING,FLAG_FALL)
+            update_rect(frame,x,y,w,h,FLAG_FALL)
             cv2.imshow('frame', frame)
+            # out.write(frame)
             # cv2.imshow('threshold', currentframe)
             # cv2.imshow('gauss', gauss_image)
 
@@ -160,4 +163,5 @@ while cap.isOpened():
         break
 
 cap.release()
+# out.release()
 cv2.destroyAllWindows()

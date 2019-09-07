@@ -25,8 +25,8 @@ def get_data_from_video(path):
     # plt.clf()
     # count = 0
     cap = cv2.VideoCapture(path)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
 
     # cap.set(cv2.CAP_PROP_FPS, 30)
     # Check if camera opened successfully
@@ -44,9 +44,9 @@ def get_data_from_video(path):
         # Capture frame-by-frame
         ret, frame = cap.read()
         # if (cap.get())
-        # frame = cv2.resize(frame, (320,240))
-        frameNum += 1
         if ret == True:
+            frameNum += 1
+            frame = cv2.resize(frame, (320,240))
             tempframe = frame.copy()
             if (frameNum == 1):
                 previousframe = cv2.cvtColor(tempframe, cv2.COLOR_BGR2GRAY)
@@ -59,12 +59,12 @@ def get_data_from_video(path):
 
                 # currentframe = cv2.morphologyEx(currentframe, cv2.MORPH_GRADIENT, kernel)
 
-                ret, threshold_frame = cv2.threshold(currentframe, 16, 255, cv2.THRESH_BINARY)
+                ret, threshold_frame = cv2.threshold(currentframe, 32, 255, cv2.THRESH_BINARY)
                 # gauss_image = cv2.GaussianBlur(threshold_frame, (7, 7), 0)
                 cnts, hierarchy = cv2.findContours(threshold_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
                 for c in cnts:
-                    if cv2.contourArea(c) < 1200 or cv2.contourArea(c) > 19200:
+                    if cv2.contourArea(c) < 1000 or cv2.contourArea(c) > 19200:
                         continue
                     # c是一个二值图，boundingRect是矩形边框函数，用一个最小的矩形，把找到的形状包起来；
                     # x,y是矩形左上点的坐标；w,h是矩阵的宽和高
@@ -76,33 +76,39 @@ def get_data_from_video(path):
                 if (w*h==0):
                     continue
 
-                if (frameNum % 2 == 0):
-                    currentSpeed = [x+w/2, y+h/2]
-                    a = ((currentSpeed[0]-tempSpeed[0])**2 + (currentSpeed[1]-tempSpeed[1])**2)**0.5
-                    # print(a)
-                    if (a > 30):
-                        a = tempa
-                    tempSpeed = currentSpeed
-                    tempa = a
-
+                # if (frameNum % 2 == 0):
+                #     currentSpeed = [x+w/2, y+h/2]
+                #     a = ((currentSpeed[0]-tempSpeed[0])**2 + (currentSpeed[1]-tempSpeed[1])**2)**0.5
+                #     # print(a)
+                #     if (a > 30):
+                #         a = tempa
+                #     tempSpeed = currentSpeed
+                #     tempa = a
 
                 plt.clf()
                 plt.title('Fall Analysis')
                 ax.append(frameNum)
-                ys = abs(y-tempY)
-                ay.append(y)                    # y of mid-point
-                if (ys<15):
+                ay.append(y-30)                    # y of mid-point
+
+                ys = y-tempY
+                if (ys<16):
                     ys = ys
                 else:
-                    ys = 0.1
+                    ys = 1
                 tempY = y
-                area_motion.append(area/1000*ys)
-                rate_w_h.append((w/h)*100)     # rate of w/h
+                motion_speed = area/500*ys
+
+                if (abs(motion_speed) < 120):
+                    area_motion.append(motion_speed)
+                else:
+                    area_motion.append(0)
+
+                rate_w_h.append((w/h - 0.5)*100)     # rate of w/h
                 # rate_speed.append(a* 3)
                 # factor.append(a*area/100)
                 timestamps.append(str(timestamp())+"{0:04d}".format(frameNum))
 
-                plt.plot(ax, ay, color='blue', label='X: y of mid-point')
+                plt.plot(ax, ay, color='blue', label='X: y of start-point')
                 plt.plot(ax, rate_w_h, color='green', label='Y: w/h')
                 plt.plot(ax, area_motion, color='orange', label='Z: area of motion')
                 # plt.plot(ax, rate_speed, color='red', label='acc')
@@ -112,7 +118,7 @@ def get_data_from_video(path):
                 plt.xlabel('Frames')
 
                 # plt.draw()                        # for ubuntu
-                plt.pause(0.01)                     # for windows
+                # plt.pause(0.01)                   # for windows
 
                 # rectangle画出矩形，frame是原图，(x,y)是矩阵的左上点坐标，(x+w,y+h)是矩阵右下点坐标
                 cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
@@ -128,29 +134,30 @@ def get_data_from_video(path):
         # Break the loop
         else:
             break
-
+    
     data = {
         'action': 'n/a',
         'timestamp': timestamps,
-        'X': ay,
-        'Y': rate_w_h,
-        'Z': area_motion  # speed of motion area
+        'x_axis': ay,
+        'y_axis': rate_w_h,
+        'z_axis': area_motion  # speed of motion area
     }
 
     df = pd.DataFrame(data)
 
     fileName = path.split('.')[0].split('/')[-1]
-    df.to_csv("dataset/{}.csv".format(fileName), mode='w',index=False, header=['action', 'timestamp', 'x-axis', 'y-axis', 'z-axis'])
+    df.to_csv("dataset/{}.csv".format(fileName), mode='w',index=False, header=['action', 'timestamp', 'x_axis', 'y_axis', 'z_axis'])
     print(df)
     # kalman.show_data(df)
 
     # plt.pause(5)
     plt.ioff()
-    # When everything done, release the video capture object
+    When everything done, release the video capture object
     cap.release()
 
     # Closes all the frames
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    get_data_from_video('video_02.avi')
+    video_path = 'E:/Fall-Detection/cam1.avi'
+    get_data_from_video(video_path)

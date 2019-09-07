@@ -18,17 +18,17 @@ def kalman_filter(data):
                                        [0, 0, 1]], np.float32) * 0.001
     kalman.measurementNoiseCov = np.array([[1, 0, 0],
                                            [0, 1, 0],
-                                           [0, 0, 1]], np.float32) * 0.008
+                                           [0, 0, 1]], np.float32) * 0.05
 
-    row_num = data.A.size
+    row_num = data.x_axis.size
 
     for i in range(row_num):
-        correct = np.array(data.iloc[i, 0:3].values, np.float32).reshape([3, 1])
+        correct = np.array(data.iloc[i, 2:5].values, np.float32).reshape([3, 1])
         kalman.correct(correct)
         predict = kalman.predict()
-        data.iloc[i, 0] = predict[0]
-        data.iloc[i, 1] = predict[1]
-        data.iloc[i, 2] = predict[2]
+        data.iloc[i, 2] = predict[0]
+        data.iloc[i, 3] = predict[1]
+        data.iloc[i, 4] = predict[2]
         # data.iloc[i, 3] = predict[3]
 
     return data
@@ -41,16 +41,16 @@ def show_data(data, name=None):
     :param data: DataFrame
     :return:
     '''
-    num = data.A.size
+    num = data.x_axis.size
 
     x = np.arange(num)
     fig = plt.figure(1, figsize=(50, 30))
     # 子表1绘制加速度传感器数据
     plt.subplot(2, 1, 1)
     plt.title('Origin')
-    plt.plot(x, data.A, label='A')
-    plt.plot(x, data.B, label='B')
-    plt.plot(x, data.C, label='C')
+    plt.plot(x, data.x_axis, label='A')
+    plt.plot(x, data.y_axis, label='B')
+    plt.plot(x, data.z_axis, label='C')
     # plt.plot(x, data.D, label='D')
 
     # 添加解释图标
@@ -63,10 +63,10 @@ def show_data(data, name=None):
     # 子表2绘制陀螺仪传感器数据
     plt.subplot(2, 1, 2)
     plt.title('After kalman')
-    plt.plot(x, tmp_data.A, label='A')
-    plt.plot(x, tmp_data.B, label='B')
-    plt.plot(x, tmp_data.C, label='C')
-    plt.plot(x, (tmp_data.A*0.2+tmp_data.B*0.5+tmp_data.C*0.3), label='w+Avg')
+    plt.plot(x, tmp_data.x_axis, label='A')
+    plt.plot(x, tmp_data.y_axis, label='B')
+    plt.plot(x, tmp_data.z_axis, label='C')
+    # plt.plot(x, (tmp_data.x_axis*0.2+tmp_data.y_axis*0.4+tmp_data.z_axis*0.4), label='w+Avg')
 
     plt.legend()
     plt.xticks(x_flag)
@@ -79,10 +79,6 @@ def show_data(data, name=None):
 
 
 
-
-data = pd.read_csv('test.csv')
-# #
-# show_data(data)
-data = kalman_filter(data)
-# # data.to_csv('./dataset/train/BSC_1_1_annotated.csv', index=False)
-show_data(data)
+if __name__ == '__main__':
+    data = pd.read_csv('E:/Fall-Detection/dataset/cam1.csv')
+    show_data(data)

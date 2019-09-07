@@ -37,9 +37,9 @@ step = 5
 segments = []
 labels = []
 for i in range(0, len(df) - N_TIME_STEPS, step):
-    xs = df['x-axis'].values[i: i + N_TIME_STEPS]
-    ys = df['y-axis'].values[i: i + N_TIME_STEPS]
-    zs = df['z-axis'].values[i: i + N_TIME_STEPS]
+    xs = df['x_axis'].values[i: i + N_TIME_STEPS]
+    ys = df['y_axis'].values[i: i + N_TIME_STEPS]
+    zs = df['z_axis'].values[i: i + N_TIME_STEPS]
     label = stats.mode(df['activity'][i: i + N_TIME_STEPS])[0][0]
     segments.append([xs, ys, zs])
     labels.append(label)
