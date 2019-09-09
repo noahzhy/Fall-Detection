@@ -95,9 +95,13 @@ def update_rect(frame,x,y,w,h,flag_fall):
     if flag_fall and fall_count > 1 :
         color = (0,0,255)
         text = 'fall'
+        img2 = cv2.imread('top.png')
+        img2 = cv2.resize(img2,(320, 240))
+        frame = cv2.addWeighted(frame,0.7,img2,0.3,0)
 
-    cv2.putText(frame, 'Status: {}'.format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
-    cv2.rectangle(frame, (x,y), (x+w,y+h), color, 2)
+    frame = cv2.putText(frame, 'Status: {}'.format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+    frame = cv2.rectangle(frame, (x,y), (x+w,y+h), color, 2)
+    return frame
 
 
 while cap.isOpened():
@@ -158,8 +162,8 @@ while cap.isOpened():
 
             # timestamps.append(str(timestamp())+"{0:04d}".format(frameNum))
             # cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-            update_rect(frame,x,y,w,h,FLAG_FALL)
-            cv2.imshow('frame', frame)
+
+            cv2.imshow('frame', update_rect(frame,x,y,w,h,FLAG_FALL))
             # out.write(frame)
             # cv2.imshow('threshold', currentframe)
             # cv2.imshow('gauss', gauss_image)
