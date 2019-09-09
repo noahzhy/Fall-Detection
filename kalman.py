@@ -80,5 +80,5 @@ def show_data(data, name=None):
 
 
 if __name__ == '__main__':
-    data = pd.read_csv('E:/Fall-Detection/dataset/cam1.csv')
+    data = pd.read_csv('E:/Fall-Detection/dataset/fall_29.csv')
     show_data(data)

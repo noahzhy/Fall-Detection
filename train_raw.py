@@ -17,7 +17,7 @@ sns.set(style='whitegrid', palette='muted', font_scale=1.5)
 rcParams['figure.figsize'] = 14, 8
 RANDOM_SEED = 42
 
-columns = ['activity','timestamp', 'x-axis', 'y-axis', 'z-axis', 'user']
+columns = ['activity','timestamp', 'x_axis', 'y_axis', 'z_axis', 'user']
 df = pd.read_csv('data/demo.csv', header = None, names = columns)
 df = df.dropna()
 
@@ -52,7 +52,7 @@ X_train, X_test, y_train, y_test = train_test_split(reshaped_segments,
                                                     test_size=0.2,
                                                     random_state=RANDOM_SEED)
 
-N_CLASSES = 3
+N_CLASSES = 4
 N_HIDDEN_UNITS = 64
 
 def create_LSTM_model(inputs):

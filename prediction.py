@@ -12,15 +12,15 @@ INPUT_NODE = "inputs"
 OUTPUT_NODES = {"y_"}
 OUTPUT_NODE = "y_"
 INPUT_SIZE = {1, 50, 3}
-OUTPUT_SIZE = 3
+OUTPUT_SIZE = 4
 
-pb = 'media/frozen_class3_epoch100_bs50.pb'
+pb = 'media/frozen_with_chute_class4_epoch150_bs2048_ts50.pb'
 
 def test_data_load():
-    df = pd.read_csv('test.csv', usecols=['x-axis', 'y-axis', 'z-axis'])
-    xs = df['x-axis'].values[0:50]
-    ys = df['y-axis'].values[0:50]
-    zs = df['z-axis'].values[0:50]
+    df = pd.read_csv('test.csv', usecols=['x_axis', 'y_axis', 'z_axis'])
+    xs = df['x_axis'].values[0:50]
+    ys = df['y_axis'].values[0:50]
+    zs = df['z_axis'].values[0:50]
     in_data = [xs, ys, zs]
     return np.asarray(in_data, dtype= np.float32).reshape(-1, 50, 3)
 

@@ -19,6 +19,7 @@ warning_timestamp = 0
 frameNum = 0
 x,y,w,h = 0, 0, 0, 0
 a, area = 0, 0
+motion_speed = 0
 tempY = 0
 fall_cancel = 0.4
 fall_count = 0
@@ -26,7 +27,7 @@ fall_count = 0
 FLAG_FALL = False
 FLAG_WARNING = False
 
-video_path = 'E:/Fall-Detection/cam8.avi'
+video_path = 'E:/Fall-Detection/cam4.avi'
 
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter('output.avi',fourcc, 25.0, (320,240))
@@ -73,6 +74,8 @@ def fall_or_not(data, frameNum):
             # FLAG_WARNING = False
             # fall_cancel = 0.4
             print('normal: {}'.format(res[1]))
+        elif (res[0] == 3):
+            print('sleep: {}'.format(res[1]))
 
 
 # def warning_status():
@@ -89,7 +92,7 @@ def update_rect(frame,x,y,w,h,flag_fall):
     color = (0,255,0)
     text = 'normal'
     # if flag_warning:
-    if flag_fall and fall_count >= 2 :
+    if flag_fall and fall_count > 1 :
         color = (0,0,255)
         text = 'fall'
 
@@ -100,7 +103,8 @@ def update_rect(frame,x,y,w,h,flag_fall):
 while cap.isOpened():
     # Capture frame-by-frame
     ret, frame = cap.read()
-    frame = cv2.resize(frame, (320,240))
+
+    # frame = cv2.resize(frame, (320,240))
     frameNum += 1
     if ret == True:
         tempframe = frame.copy()
@@ -113,7 +117,7 @@ while cap.isOpened():
             currentframe = cv2.absdiff(currentframe, previousframe)
             currentframe = cv2.dilate(currentframe, None, iterations = 7)
             currentframe = cv2.erode(currentframe, None, iterations = 5)
-            ret, threshold_frame = cv2.threshold(currentframe, 16, 255, cv2.THRESH_BINARY)
+            ret, threshold_frame = cv2.threshold(currentframe, 20, 255, cv2.THRESH_BINARY)
             cnts, hierarchy = cv2.findContours(threshold_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             for c in cnts:
@@ -127,18 +131,24 @@ while cap.isOpened():
             if (w*h==0):
                 continue
 
-            if (y-tempY)<0:
+            if (y-tempY)<-10:
                 if (fall_count > 0):
                     fall_count -= 1
 
-            ys = abs(y-tempY)
+            ys = y-tempY
             if (ys<16):
                 ys = ys
             else:
-                ys = 0.1
+                ys = 1
             tempY = y
 
-            data.append([y, (w/h)*100, area/1000*ys])
+            motion_speed = area/500*ys
+            if (abs(motion_speed) < 120):
+                pass
+            else:
+                motion_speed = 0
+
+            data.append([y-30, (w/h-0.5)*100, motion_speed])
 
             if len(data)>=50:
                 try:

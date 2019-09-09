@@ -118,7 +118,7 @@ def get_data_from_video(path):
                 plt.xlabel('Frames')
 
                 # plt.draw()                        # for ubuntu
-                # plt.pause(0.01)                   # for windows
+                plt.pause(0.1)                   # for windows
 
                 # rectangle画出矩形，frame是原图，(x,y)是矩阵的左上点坐标，(x+w,y+h)是矩阵右下点坐标
                 cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
@@ -134,7 +134,7 @@ def get_data_from_video(path):
         # Break the loop
         else:
             break
-    
+
     data = {
         'action': 'n/a',
         'timestamp': timestamps,
@@ -152,12 +152,12 @@ def get_data_from_video(path):
 
     # plt.pause(5)
     plt.ioff()
-    When everything done, release the video capture object
+    # When everything done, release the video capture object
     cap.release()
 
     # Closes all the frames
     cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    video_path = 'E:/Fall-Detection/cam1.avi'
+    video_path = 'E:/Fall-Detection/cam2.avi'
     get_data_from_video(video_path)
