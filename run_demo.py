@@ -27,8 +27,8 @@ fall_count = 0
 FLAG_FALL = False
 FLAG_WARNING = False
 
-video_path = 'E:/Fall-Detection/cam4.avi'
-
+# video_path = 'E:/Fall-Detection/cam4.avi'
+video_path = 0
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter('output.avi',fourcc, 25.0, (320,240))
 
@@ -75,7 +75,8 @@ def fall_or_not(data, frameNum):
             # fall_cancel = 0.4
             print('normal: {}'.format(res[1]))
         elif (res[0] == 3):
-            print('sleep: {}'.format(res[1]))
+            pass
+            # print('sleep: {}'.format(res[1]))
 
 
 # def warning_status():
@@ -107,8 +108,7 @@ def update_rect(frame,x,y,w,h,flag_fall):
 while cap.isOpened():
     # Capture frame-by-frame
     ret, frame = cap.read()
-
-    # frame = cv2.resize(frame, (320,240))
+    frame = cv2.resize(frame, (320,240))
     frameNum += 1
     if ret == True:
         tempframe = frame.copy()
