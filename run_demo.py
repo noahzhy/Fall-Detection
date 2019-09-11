@@ -27,8 +27,8 @@ fall_count = 0
 FLAG_FALL = False
 FLAG_WARNING = False
 
-# video_path = 'E:/Fall-Detection/cam4.avi'
-video_path = 0
+video_path = 'E:/Fall-Detection/cam5.avi'
+# video_path = 0
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
 # out = cv2.VideoWriter('output.avi',fourcc, 25.0, (320,240))
 
@@ -51,31 +51,34 @@ def fall_or_not(data, frameNum):
     global fall_count
     global warning_timestamp
 
-    if (frameNum%10 == 0):
+    if (frameNum%15 == 0):
         # if FLAG_WARNING:
         #     warning_status()
-
-        res = pre.prediction(data)
-        if (res[0] == 0 and res[1] > 0.59):
-            FLAG_FALL = True
-            fall_count += 1
-            # fall_cancel = 0.4
-            # if (FLAG_WARNING == False):
-            #     warning_timestamp = timestamp()
-            #     FLAG_WARNING = True
-            # else:
-
-            print('fall: {}'.format(res[1]))
-        elif (res[0] == 1):
-            print('lying: {}'.format(res[1]))
-        elif (res[0] == 2 and res[1] > fall_cancel):
-            FLAG_FALL = False
-            fall_count = 0
-            # FLAG_WARNING = False
-            # fall_cancel = 0.4
-            print('normal: {}'.format(res[1]))
-        elif (res[0] == 3):
+        if x == 0 or x+w == 320:
             pass
+        else:
+
+            res = pre.prediction(data)
+            if (res[0] == 0 and res[1] > 0.80):
+                FLAG_FALL = True
+                fall_count += 1
+                # fall_cancel = 0.4
+                # if (FLAG_WARNING == False):
+                #     warning_timestamp = timestamp()
+                #     FLAG_WARNING = True
+                # else:
+
+                print('fall: {}'.format(res[1]))
+            elif (res[0] == 1):
+                print('lying: {}'.format(res[1]))
+            elif (res[0] == 2 and res[1] > fall_cancel):
+                FLAG_FALL = False
+                fall_count = 0
+                # FLAG_WARNING = False
+                # fall_cancel = 0.4
+                print('normal: {}'.format(res[1]))
+            elif (res[0] == 3):
+                pass
             # print('sleep: {}'.format(res[1]))
 
 
@@ -93,7 +96,7 @@ def update_rect(frame,x,y,w,h,flag_fall):
     color = (0,255,0)
     text = 'normal'
     # if flag_warning:
-    if flag_fall and fall_count > 1 :
+    if flag_fall and fall_count > 2 :
         color = (0,0,255)
         text = 'fall'
         img2 = cv2.imread('top.png')
