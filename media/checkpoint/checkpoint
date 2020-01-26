@@ -1,2 +1,2 @@
-model_checkpoint_path: "class3_epoch100_bs50.ckpt"
-all_model_checkpoint_paths: "class3_epoch100_bs50.ckpt"
+model_checkpoint_path: "/content/drive/My Drive/fd_v2/media/with_chute_class4_epoch150_bs2048_ts50.ckpt"
+all_model_checkpoint_paths: "/content/drive/My Drive/fd_v2/media/with_chute_class4_epoch150_bs2048_ts50.ckpt"

@@ -10,11 +10,13 @@ import csv
 import os
 # import minpy.numpy as np
 
+cap_with = 1280
+cap_height = 720
 
 data = deque(maxlen=50)
-x_axis = []
-y_axis = []
-z_axis = []
+# x_axis = []
+# y_axis = []
+# z_axis = []
 warning_timestamp = 0
 frameNum = 0
 x,y,w,h = 0, 0, 0, 0
@@ -27,18 +29,18 @@ fall_count = 0
 FLAG_FALL = False
 FLAG_WARNING = False
 
-video_path = 'E:/Fall-Detection/cam5.avi'
-# video_path = 0
-# fourcc = cv2.VideoWriter_fourcc(*'XVID')
-# out = cv2.VideoWriter('output.avi',fourcc, 25.0, (320,240))
+# video_path = 'E:/Fall-Detection/cam3.avi'
+video_path = 0
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output_{}.avi'.format(time.strftime("%Y%m%d_%H%M%S", time.localtime())), fourcc, 25.0, (320,240))
 
 def timestamp(convert_to_utc=False):
     t = time.time()
     return int(t)
 
 cap = cv2.VideoCapture(video_path)
-cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
-cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+cap.set(cv2.CAP_PROP_FRAME_WIDTH, cap_with)
+cap.set(cv2.CAP_PROP_FRAME_HEIGHT, cap_height)
 cap.set(cv2.CAP_PROP_FPS, 25)
 
 if (cap.isOpened() == False):
@@ -96,14 +98,17 @@ def update_rect(frame,x,y,w,h,flag_fall):
     color = (0,255,0)
     text = 'normal'
     # if flag_warning:
-    if flag_fall and fall_count > 2 :
+    if flag_fall and fall_count > 1 :
         color = (0,0,255)
         text = 'fall'
         img2 = cv2.imread('top.png')
-        img2 = cv2.resize(img2,(320, 240))
+        img2 = cv2.resize(img2,(cap_with, cap_height))
         frame = cv2.addWeighted(frame,0.7,img2,0.3,0)
 
     frame = cv2.putText(frame, 'Status: {}'.format(text), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
+    xw_rate = int(cap_with / 320)
+    yh_rate = int(cap_height / 240)
+    (x, y, w, h) = (x*xw_rate, y*yh_rate, w*xw_rate, h*yh_rate)
     frame = cv2.rectangle(frame, (x,y), (x+w,y+h), color, 2)
     return frame
 
@@ -111,6 +116,7 @@ def update_rect(frame,x,y,w,h,flag_fall):
 while cap.isOpened():
     # Capture frame-by-frame
     ret, frame = cap.read()
+    for_show = frame.copy()
     frame = cv2.resize(frame, (320,240))
     frameNum += 1
     if ret == True:
@@ -165,9 +171,11 @@ while cap.isOpened():
 
             # timestamps.append(str(timestamp())+"{0:04d}".format(frameNum))
             # cv2.rectangle(frame, (x,y), (x+w,y+h), (0,255,0), 2)
-
-            cv2.imshow('frame', update_rect(frame,x,y,w,h,FLAG_FALL))
-            # out.write(frame)
+            out_win = "frame"
+            cv2.namedWindow(out_win, cv2.WINDOW_NORMAL)
+            cv2.setWindowProperty(out_win, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            cv2.imshow(out_win, update_rect(for_show,x,y,w,h,FLAG_FALL))
+            out.write(frame)
             # cv2.imshow('threshold', currentframe)
             # cv2.imshow('gauss', gauss_image)
 
@@ -180,5 +188,5 @@ while cap.isOpened():
         break
 
 cap.release()
-# out.release()
+out.release()
 cv2.destroyAllWindows()
